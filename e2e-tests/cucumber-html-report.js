@@ -21,6 +21,7 @@ report.generate({
     },
     device: process.env.DEVICE_NAME,
     platform: {
+      name: process.env.PLATFORM_NAME,
       version: process.env.PLATFORM_VERSION,
     },
   },

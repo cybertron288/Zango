@@ -31,7 +31,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        browser: [firefox]
+        browser: [chrome, firefox, edge]
 
     steps:
       # Step 1: Checkout repo
