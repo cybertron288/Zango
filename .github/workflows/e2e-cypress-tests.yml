@@ -30,7 +30,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [macos-latest]
         browser: [chrome, firefox, edge]
         # Exclude combinations where Edge is not available or not needed
         exclude:
