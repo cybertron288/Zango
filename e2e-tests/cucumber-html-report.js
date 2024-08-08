@@ -21,7 +21,6 @@ report.generate({
     },
     device: process.env.DEVICE_NAME,
     platform: {
-      name: process.env.PLATFORM_NAME,
       version: process.env.PLATFORM_VERSION,
     },
   },
@@ -31,7 +30,7 @@ report.generate({
       { label: "Project", value: "Zango e2e-Tests Report" },
       { label: "Zango Version", value: process.env.ZANGO_VERSION },
       { label: "Execution Date Time", value: executionDateTime },
-      { label: "Platform Name", value: process.env.PLATFORM_NAME },
+      { label: "Platform", value: process.env.PLATFORM_NAME },
       { label: "Execution Duration", value: process.env.DURATION },
     ],
   },
