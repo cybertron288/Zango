@@ -24,9 +24,14 @@ on:
       - released
 
 jobs:
-  setup:
-    runs-on: windows-latest
-    name: Setup Project
+  cypress-run:
+    runs-on: ${{ matrix.os }}
+    name: E2E on ${{ matrix.os }} with ${{ matrix.browser }}
+
+    strategy:
+      matrix:
+        os: [windows-latest]
+        browser: [chrome, firefox, edge]
 
     steps:
       # Step 1: Checkout repo
@@ -34,10 +39,10 @@ jobs:
         uses: actions/checkout@v3
 
       # Step 2: Remove old build files
-      # - name: Remove old build files
-      #   run: |
-      #     find backend/src/zango/assets/app_panel/js -name "build.*.min.js" -type f -delete
-      #     find backend/src/zango/assets/app_panel/js -name "build.*.min.js.LICENSE.txt" -type f -delete
+      - name: Remove old build files
+        run: |
+          find backend/src/zango/assets/app_panel/js -name "build.*.min.js" -type f -delete
+          find backend/src/zango/assets/app_panel/js -name "build.*.min.js.LICENSE.txt" -type f -delete
 
       # Step 3: Installing Node
       - name: Install Node.js
@@ -58,7 +63,7 @@ jobs:
           CI=false yarn build
 
       # Step 6: Removing license file for the new build
-      - name: Remove old build files
+      - name: Remove new license files
         run: |
           find backend/src/zango/assets/app_panel/js -name "build.*.min.js.LICENSE.txt" -type f -delete
 
@@ -75,29 +80,30 @@ jobs:
           platform_domain_url: localhost
           domain_config_path: ./e2e-tests/local_domains.txt
 
-  cypress-run-chrome:
-    runs-on: windows-latest
-    name: E2E on Chrome
-    needs: setup
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      # Step 8: Capturing start time
       - name: Capture Start Time
         id: start-time
         run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+
+      # Step 9: Install cypress dependencies
       - name: Install cypress dependencies
         run: npm install
         working-directory: e2e-tests
+
+      # Step 10: Run Cypress tests and record results
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
-          browser: chrome
+          browser: ${{ matrix.browser }}
           working-directory: e2e-tests
         continue-on-error: true
+
+      # Step 11: Capturing end time
       - name: Capture End Time
         id: end-time
         run: echo "END_TIME=$(date +%s)" >> $GITHUB_ENV
+
+      # Step 12: Calculating total duration of cypress tests
       - name: Calculate Duration
         id: duration
         run: |
@@ -106,11 +112,15 @@ jobs:
           DURATION_REMAINDER_SECONDS=$((DURATION_SECONDS % 60))
           DURATION="${DURATION_MINUTES}m ${DURATION_REMAINDER_SECONDS}s"
           echo "DURATION=${DURATION}" >> $GITHUB_ENV
+
+      # Step 13: Extracting zango version
       - name: Extract Version
         id: extract_version
         run: |
           ZANGO_VERSION=$(grep '__version__' backend/src/zango/__init__.py | sed 's/.*__version__ = "\(.*\)"/\1/' | tail -1)
           echo "ZANGO_VERSION=${ZANGO_VERSION}" >> $GITHUB_ENV
+
+      # Step 14: Generate Cucumber HTML Report
       - name: Generate Cucumber HTML Report
         run: |
           echo "Running cucumber-html-report.js"
@@ -118,92 +128,30 @@ jobs:
           node cucumber-html-report.js
         working-directory: e2e-tests
         env:
-          BROWSER_NAME: chrome
+          BROWSER_NAME: ${{ matrix.browser }}
           BROWSER_VERSION: "127" # Adjust this if needed
           DEVICE_NAME: "Remote Device"
-          PLATFORM_NAME: windows
-          PLATFORM_VERSION: "10"
+          PLATFORM_NAME: ${{ matrix.os }}
+          PLATFORM_VERSION: ${{ matrix.os == 'windows-latest' && '10' || '12' }}
           CI_ENVIRONMENT: "GitHub Actions"
+
+      # Step 15: Upload Cypress screenshots
       - name: Upload Cypress screenshots
         uses: actions/upload-artifact@v3
         with:
-          name: cypress-windows-chrome-screenshots
+          name: cypress-${{ matrix.os }}-${{ matrix.browser }}-screenshots
           path: e2e-tests/cypress/screenshots
           if-no-files-found: ignore
+
+      # Step 16: Upload Cypress videos
       - name: Upload Cypress videos
         uses: actions/upload-artifact@v3
         with:
-          name: cypress-windows-chrome-videos
+          name: cypress-${{ matrix.os }}-${{ matrix.browser }}-videos
           path: e2e-tests/cypress/videos
           if-no-files-found: ignore
-      - name: Upload Cucumber HTML Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: cucumber-html-report
-          path: e2e-tests/reports/cucumber-html-report.html
-          if-no-files-found: ignore
 
-  cypress-run-firefox:
-    runs-on: windows-latest
-    name: E2E on Firefox
-    needs: cypress-run-chrome
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Capture Start Time
-        id: start-time
-        run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
-      - name: Install cypress dependencies
-        run: npm install
-        working-directory: e2e-tests
-      - name: Run Cypress tests
-        uses: cypress-io/github-action@v6
-        with:
-          browser: firefox
-          working-directory: e2e-tests
-        continue-on-error: true
-      - name: Capture End Time
-        id: end-time
-        run: echo "END_TIME=$(date +%s)" >> $GITHUB_ENV
-      - name: Calculate Duration
-        id: duration
-        run: |
-          DURATION_SECONDS=$((END_TIME - START_TIME))
-          DURATION_MINUTES=$((DURATION_SECONDS / 60))
-          DURATION_REMAINDER_SECONDS=$((DURATION_SECONDS % 60))
-          DURATION="${DURATION_MINUTES}m ${DURATION_REMAINDER_SECONDS}s"
-          echo "DURATION=${DURATION}" >> $GITHUB_ENV
-      - name: Extract Version
-        id: extract_version
-        run: |
-          ZANGO_VERSION=$(grep '__version__' backend/src/zango/__init__.py | sed 's/.*__version__ = "\(.*\)"/\1/' | tail -1)
-          echo "ZANGO_VERSION=${ZANGO_VERSION}" >> $GITHUB_ENV
-      - name: Generate Cucumber HTML Report
-        run: |
-          echo "Running cucumber-html-report.js"
-          ls -la
-          node cucumber-html-report.js
-        working-directory: e2e-tests
-        env:
-          BROWSER_NAME: firefox
-          BROWSER_VERSION: "127" # Adjust this if needed
-          DEVICE_NAME: "Remote Device"
-          PLATFORM_NAME: windows
-          PLATFORM_VERSION: "10"
-          CI_ENVIRONMENT: "GitHub Actions"
-      - name: Upload Cypress screenshots
-        uses: actions/upload-artifact@v3
-        with:
-          name: cypress-windows-firefox-screenshots
-          path: e2e-tests/cypress/screenshots
-          if-no-files-found: ignore
-      - name: Upload Cypress videos
-        uses: actions/upload-artifact@v3
-        with:
-          name: cypress-windows-firefox-videos
-          path: e2e-tests/cypress/videos
-          if-no-files-found: ignore
+      # Step 17: Upload Cucumber HTML Report
       - name: Upload Cucumber HTML Report
         uses: actions/upload-artifact@v3
         with:
