@@ -30,14 +30,14 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         browser: [chrome, firefox, edge]
         # Exclude combinations where Edge is not available or not needed
         exclude:
           - os: macos-latest
             browser: edge
-          - os: ubuntu-latest
-            browser: edge
+          # - os: ubuntu-latest
+          #   browser: edge
 
     steps:
       # Step 1: Checkout repo
