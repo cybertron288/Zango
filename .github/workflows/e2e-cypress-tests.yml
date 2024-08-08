@@ -30,7 +30,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest]
         browser: [chrome, firefox, edge]
 
     steps:
