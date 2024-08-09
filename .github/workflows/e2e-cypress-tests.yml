@@ -132,7 +132,7 @@ jobs:
           BROWSER_VERSION: "127" # Adjust this if needed
           DEVICE_NAME: "Remote Device"
           PLATFORM_NAME: ${{ matrix.os }}
-          PLATFORM_VERSION: ${{ matrix.os == 'ubuntu-latest' && '22.04.4' || matrix.os == 'macos-latest' && '14' }}
+          PLATFORM_VERSION: ${{ matrix.os == 'ubuntu-latest' && '22.04.4'}}
           CI_ENVIRONMENT: "GitHub Actions"
 
       # Step 15: Upload Cypress screenshots
