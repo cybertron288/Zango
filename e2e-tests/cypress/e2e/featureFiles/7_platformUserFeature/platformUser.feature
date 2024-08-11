@@ -1,6 +1,7 @@
 Feature: Platform User Management
     Background: Navigates to the application platform
         Given Admin navigates to the user management tab and gets the platform user data from fixtures
+
     Scenario: New platform user creation by the admin
         When Admin clicks on the new user button on the user management page
         And Admin creates the dynamic data of the platform user
