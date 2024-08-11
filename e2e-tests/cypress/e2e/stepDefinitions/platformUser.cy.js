@@ -3,6 +3,7 @@ import appPanelPageObjects from "../../support/pageObjectModel/appPanelPageObjec
 import { error_message } from "../../e2e/utils/helper";
 let platformUserData;
 let appData;
+
 Given(
   "Admin navigates to the user management tab and gets the platform user data from fixtures",
   () => {
@@ -19,6 +20,7 @@ Given(
 When("Admin clicks on the new user button on the user management page", () => {
   appPanelPageObjects.getAddUserManagement().click();
 });
+
 And("Admin creates the dynamic data of the platform user", () => {
   const dynamicData = {
     platform_user_name: `user_${Math.floor(Math.random() * 10000)}`, //To create random text
@@ -41,6 +43,7 @@ And("Admin creates the dynamic data of the platform user", () => {
   cy.readFile("cypress/fixtures/platformUserData.json");
   expect(Cypress.currentRetry).to.eq(0);
 });
+
 And(
   "Add platform user form is dispalyed with the following fields",
   (datatables) => {
@@ -64,6 +67,7 @@ And(
     });
   }
 );
+
 And(
   "Admin fills up the platform user form with valid data and submits the form",
   () => {
@@ -87,6 +91,7 @@ And(
     appPanelPageObjects.getSubmitButton().click({ force: true });
   }
 );
+
 Then(
   "Platform User should be successfully added and admin should be redirected to the table view",
   () => {
@@ -99,6 +104,7 @@ And(
     cy.url().should("contain", "/user-managements");
   }
 );
+
 Then(
   "Api response post platform user creation should have message {string} and status code {int}",
   (message, status_code) => {
@@ -110,6 +116,7 @@ Then(
     });
   }
 );
+
 And("Admin skips the mandatory fields on the platform user form", () => {
   appPanelPageObjects.getUserManagementFullName().click();
   appPanelPageObjects.getUserManagementEmail().click();
@@ -119,6 +126,7 @@ And("Admin skips the mandatory fields on the platform user form", () => {
     expect($btn).not.to.be.visible;
   });
 });
+
 Then(
   "Required field error message should be displayed on the platform user form",
   () => {
@@ -138,6 +146,7 @@ Then(
     });
   }
 );
+
 Then(
   "Error message for duplication of platform user management should be displayed",
   () => {
@@ -150,9 +159,11 @@ Then(
     appPanelPageObjects.getGoBackButton().click();
   }
 );
+
 When("Admin wants to validate the user management tab URL", () => {
   cy.url().should("contain", "/user-managements");
 });
+
 And(
   "User management table should contain the following columns",
   (datatables) => {
@@ -171,6 +182,7 @@ And(
     });
   }
 );
+
 And(
   "Admin clicks on the user management table search button and Enters the valid data",
   () => {
@@ -186,6 +198,7 @@ And(
     );
   }
 );
+
 Then("User management table row should contain the valid data", () => {
   appPanelPageObjects
     .getFirstRowValue()
@@ -208,9 +221,11 @@ Then("User management table row should contain the valid data", () => {
         .should("contain", appData.app_name);
     });
 });
+
 When("Admin lands on the user management tab", () => {
   cy.url().should("contain", "/user-managements");
 });
+
 Then(
   "Api response post landing on user management tab should have message {string} and status code {int}",
   (message, status_code) => {
@@ -222,6 +237,7 @@ Then(
     });
   }
 );
+
 Then(
   "Api response post search should have message {string} total records should be {int} and status code {int} in platform user table",
   (message, total_records, status_code) => {
@@ -241,8 +257,9 @@ Then(
     });
   }
 );
+
 And(
-  "Admin clicks on the deactivate user management button under the three dots menu",
+  "Admin clicks on the deactivate platform user button under the three dots menu",
   () => {
     cy.wait("@getPlatformUserSearch").then((intercept) => {
       const responseBody = JSON.parse(intercept.response.body);
@@ -267,8 +284,9 @@ And(
     });
   }
 );
+
 And(
-  "Admin clicks on the Activate user management button under the three dots menu",
+  "Admin clicks on the activate platform user button under the three dots menu",
   () => {
     cy.wait("@getPlatformUserSearch").then((intercept) => {
       const responseBody = JSON.parse(intercept.response.body);
@@ -293,6 +311,7 @@ And(
     });
   }
 );
+
 And(
   "Api response post platform user update should have message {string} and status code {int}",
   (message, status_code) => {
@@ -304,6 +323,7 @@ And(
     });
   }
 );
+
 Then("Post deactivation platform user should get deactivated", () => {
   cy.wait("@getPlatformUserUpdate").then((intercept) => {
     expect(
@@ -311,6 +331,7 @@ Then("Post deactivation platform user should get deactivated", () => {
     ).to.equal(false);
   });
 });
+
 And("Post activation platform user should get activated", () => {
   cy.wait("@getPlatformUserUpdate").then((intercept) => {
     expect(
@@ -318,8 +339,9 @@ And("Post activation platform user should get activated", () => {
     ).to.equal(true);
   });
 });
+
 And(
-  "Admin clicks on the edit user management button under the three dots menu",
+  "Admin clicks on the edit platform user button under the three dots menu",
   () => {
     cy.wait("@getPlatformUserSearch").then((intercept) => {
       const responseBody = JSON.parse(intercept.response.body);
@@ -344,6 +366,7 @@ And(
     });
   }
 );
+
 And("Admin updates the user form with the valid data", () => {
   cy.wait("@getPlatformUserSearch").then((intercept) => {
     const responseBody = JSON.parse(intercept.response.body);
