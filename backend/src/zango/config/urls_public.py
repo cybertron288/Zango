@@ -7,10 +7,6 @@ from decorator_include import decorator_include
 
 from zango.core.decorators import internal_access_only
 
-# handler404 = "zango.core.generic_views.error.handler_404"
-# handler500 = "zango.core.generic_views.error.handler_500"
-# handler403 = "zango.core.generic_views.error.handler_403"
-
 urlpatterns = [
     re_path(
         r"^auth/",
